@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>کیسه | Kiseh Lottery</title>
+    <style>
+        body {
+            background-color: #1a1a2e; /* رنگ پس‌زمینه سرمه‌ای تیره */
+            color: #ffffff;
+            font-family: Tahoma, sans-serif;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #ffd700; /* رنگ طلایی */
+            text-shadow: 0 0 10px #ffd700;
+            margin-bottom: 5px;
+        }
+        .logo {
+            font-size: 80px;
+            margin: 20px 0;
+            display: block;
+        }
+        .card {
+            background: #16213e;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            margin-top: 20px;
+            border: 1px solid #30475e;
+        }
+        .btn {
+            background: linear-gradient(45deg, #ff8c00, #ff0080);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .btn:active {
+            transform: scale(0.95);
+        }
+        #status {
+            margin-top: 15px;
+            color: #00ff88;
+            font-size: 14px;
+        }
+        /* تنظیمات دکمه اتصال ولت */
+        #ton-connect {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+    </style>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <div class="logo">💰</div>
+        <h1>کیسه</h1>
+        <p>اولین پلتفرم شانس غیرمتمرکز</p>
+
+        <div id="ton-connect"></div>
+
+        <div class="card">
+            <h3>🎟 بلیط شانس</h3>
+            <p>قیمت: <strong>1 TON</strong> (تستی)</p>
+            <p style="color: #aaa; font-size: 12px;">ظرفیت استخر: 10 نفر</p>
+            
+            <button class="btn" onclick="buyTicket()">خرید بلیط شانسی</button>
+            
+            <div id="status"></div>
+        </div>
+    </div>
+
+    <script>
+        // 1. تنظیمات اتصال به کیف پول
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://raw.githubusercontent.com/ton-community/tutorials/main/03-client/test/public/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect'
+        });
+
+        // 2. آدرس قرارداد هوشمند تو (که ساختی)
+        const contractAddress = "kQDipRMTLRUnpqgLVnXLBHZ79A0Y3RarvnxYv8Aq3bBn1wlO";
+
+        // 3. تابع خرید بلیط
+        async function buyTicket() {
+            const statusDiv = document.getElementById("status");
+
+            // چک کنیم آیا کیف پول وصل است؟
+            if (!tonConnectUI.connected) {
+                alert("لطفاً اول کیف پول خود را وصل کنید!");
+                return;
+            }
+
+            statusDiv.innerText = "در حال ارسال تراکنش...";
+
+            // اطلاعات تراکنش
+            const transaction = {
+                validUntil: Math.floor(Date.now() / 1000) + 60, // اعتبار: 60 ثانیه
+                messages: [
+                    {
+                        address: contractAddress,
+                        amount: "1000000000", // مبلغ: 1 TON (به واحد نانو)
+                        // payload: "te6ccgEBAQEAAgAAAA==" // (اختیاری: اگر نیاز به پیام خاصی بود)
+                    }
+                ]
+            };
+
+            try {
+                // ارسال درخواست به کیف پول
+                const result = await tonConnectUI.sendTransaction(transaction);
+                
+                // اگر موفق بود:
+                statusDiv.innerText = "✅ تراکنش ارسال شد! منتظر تایید شبکه...";
+                console.log("Transaction sent:", result);
+                alert("تبریک! بلیط شما خریداری شد. منتظر نتیجه قرعه‌کشی باشید.");
+            } catch (e) {
+                // اگر خطا داد یا کاربر کنسل کرد:
+                statusDiv.innerText = "❌ خطا در خرید.";
+                console.error(e);
+            }
+        }
+    </script>
+</body>
+</html>
